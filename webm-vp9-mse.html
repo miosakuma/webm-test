@@ -1,0 +1,61 @@
+
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<title>VP9 with MSE</title>
+</head>
+
+<body>
+<h1>
+VP9 with MSE
+</h1>
+
+<p>
+<video id="player" style="background-color: black" width="640" controls="">
+</video>
+</p>
+
+<script type="text/javascript">
+var button;
+var player;
+
+var sourceBuffer;
+var mediaSource;
+
+
+window.addEventListener('load', function () {
+  mediaSource = new MediaSource();
+  mediaSource.addEventListener('sourceopen', mediaSourceOpen);
+
+  player = document.getElementById('player');
+  player.src = window.URL.createObjectURL(mediaSource);
+
+});
+
+function mediaSourceOpen() {
+  var mimeType = 'video/webm; codecs="vp9,opus"';
+
+  sourceBuffer = mediaSource.addSourceBuffer(mimeType);
+  sourceBuffer.addEventListener('updateend', function () {
+    mediaSource.endOfStream();
+  });
+
+  fetchNextSegment('media_test_data_bear-vp9-opus.webm', function (bytes) {
+    sourceBuffer.appendBuffer(bytes);
+  });
+}
+
+function fetchNextSegment(filename, cb) {
+  var req = new XMLHttpRequest();
+
+  req.open('get', 'video/' + filename, true);
+  req.onload = function (e) {
+    cb(new Uint8Array(req.response));
+  };
+  req.responseType = 'arraybuffer';
+  req.send();
+}
+</script>
+
+</body>
+</html>
